@@ -1,4 +1,11 @@
-## Hi there 👋
+### Hi there 👋
+
+![](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=thc1006&theme=github)
+
+![](https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=thc1006&theme=github)
+![](https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=thc1006&theme=github)
+![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=thc1006&theme=github)
+![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=thc1006&theme=github)
 
 <!--
 **thc1006/thc1006** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
