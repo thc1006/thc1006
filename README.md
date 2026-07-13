@@ -12,8 +12,9 @@ Research assistant at National Yang Ming Chiao Tung University, Taiwan.
 |  |  |
 | --- | --- |
 | **CNCF DevStats** | [**1,712**](https://devstats.cluster.fun/?user=thc1006) |
-| **Merged upstream** | **97 pull requests across 46 projects.** 79 of them in 40 CNCF-hosted and Kubernetes-ecosystem repositories. |
-| **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) · Zephyr **M5Stack platforms maintainer** |
+| **Merged upstream** | **98 pull requests across 46 projects.** 79 of them in 40 CNCF-hosted and Kubernetes-ecosystem repositories. |
+| **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) |
+| **Maintainer** | **M5Stack Platforms** in upstream Zephyr, `status: maintained` ([MAINTAINERS.yml](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml)) |
 | **Community** | Organizer of the *O-RAN in B5G/6G* track at COSCUP · I give technical talks in Taiwanese (Tâi-gí) |
 
 Every merged contribution, listed and linked: **[open-source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/)**
