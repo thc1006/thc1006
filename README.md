@@ -5,6 +5,7 @@
 **Kubernetes scheduling and quota accounting · Observability · Cloud-native telecom**
 
 Nephio Technical Steering Committee member (LF Networking).
+Maintainer of M5Stack Platforms in upstream Zephyr.
 Research assistant at National Yang Ming Chiao Tung University, Taiwan.
 
 </div>
