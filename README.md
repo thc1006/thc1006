@@ -13,7 +13,7 @@ Research assistant at National Yang Ming Chiao Tung University, Taiwan.
 |  |  |
 | --- | --- |
 | **CNCF DevStats** | [**1,779**](https://devstats.cluster.fun/?user=thc1006) |
-| **Merged upstream** | **98 pull requests across 46 projects.** 79 of them in 40 CNCF-hosted and Kubernetes-ecosystem repositories. |
+| **Merged upstream** | **99 pull requests across 46 projects.** 80 of them in 40 CNCF-hosted and Kubernetes-ecosystem repositories. |
 | **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) |
 | **Maintainer** | **M5Stack Platforms** in upstream Zephyr, `status: maintained` ([MAINTAINERS.yml](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml)) |
 | **Community** | Organizer of the *O-RAN in B5G/6G* track at COSCUP · I give technical talks in Taiwanese (Tâi-gí) |
@@ -26,7 +26,9 @@ Every merged contribution, listed and linked: **[open-source portfolio](https://
 
 I audit Dynamic Resource Allocation for arithmetic and lifecycle bugs. It began with an `int64` overflow in quota accounting, which I reported in [`kueue#12896`](https://github.com/kubernetes-sigs/kueue/issues/12896), fixed across four merged pull requests, then found and fixed in [Volcano](https://github.com/volcano-sh/volcano/pull/5621).
 
-That audit is now open across the ecosystem: overflow and panic bugs in Kubernetes core DRA ([3 pull requests](https://github.com/kubernetes/kubernetes/pulls?q=is%3Apr+author%3Athc1006), [5 issues](https://github.com/kubernetes/kubernetes/issues?q=is%3Aissue+author%3Athc1006)), a slice-bounds panic in CNCF [container-device-interface](https://github.com/cncf-tags/container-device-interface/pull/321), a nil dereference in [KubeVirt](https://github.com/kubevirt/kubevirt/pull/18431), and quota-accounting problems in [KAI-Scheduler](https://github.com/kai-scheduler/KAI-Scheduler/issues/1881). These are under review and not yet merged.
+The audit has since reached Kubernetes core. I reported a counter-cache collision between DRA drivers in [`#140434`](https://github.com/kubernetes/kubernetes/issues/140434) and fixed it in [`#140435`](https://github.com/kubernetes/kubernetes/pull/140435), merged with a release note.
+
+Still under review: two more core pull requests and four core issues, a slice-bounds panic in CNCF [container-device-interface](https://github.com/cncf-tags/container-device-interface/pull/321), a nil dereference in [KubeVirt](https://github.com/kubevirt/kubevirt/pull/18431), and quota-accounting problems in [KAI-Scheduler](https://github.com/kai-scheduler/KAI-Scheduler/issues/1881).
 
 ### Next
 
