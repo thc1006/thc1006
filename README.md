@@ -24,7 +24,9 @@ Every merged contribution, listed and linked: **[open-source portfolio](https://
 
 ### Recent work
 
-An `int64` overflow in Dynamic Resource Allocation quota accounting. I reported it in [`kueue#12896`](https://github.com/kubernetes-sigs/kueue/issues/12896), fixed it across four merged pull requests ([#12897](https://github.com/kubernetes-sigs/kueue/pull/12897), [#12909](https://github.com/kubernetes-sigs/kueue/pull/12909), [#12945](https://github.com/kubernetes-sigs/kueue/pull/12945), [#12954](https://github.com/kubernetes-sigs/kueue/pull/12954)), found the same arithmetic in [Volcano](https://github.com/volcano-sh/volcano/pull/5621), and raised the contract question upstream in [`kubernetes#140424`](https://github.com/kubernetes/kubernetes/issues/140424).
+I audit Dynamic Resource Allocation for arithmetic and lifecycle bugs. It began with an `int64` overflow in quota accounting, which I reported in [`kueue#12896`](https://github.com/kubernetes-sigs/kueue/issues/12896), fixed across four merged pull requests, then found and fixed in [Volcano](https://github.com/volcano-sh/volcano/pull/5621).
+
+That audit is now open across the ecosystem: overflow and panic bugs in Kubernetes core DRA ([3 pull requests](https://github.com/kubernetes/kubernetes/pulls?q=is%3Apr+author%3Athc1006), [5 issues](https://github.com/kubernetes/kubernetes/issues?q=is%3Aissue+author%3Athc1006)), a slice-bounds panic in CNCF [container-device-interface](https://github.com/cncf-tags/container-device-interface/pull/321), a nil dereference in [KubeVirt](https://github.com/kubevirt/kubevirt/pull/18431), and quota-accounting problems in [KAI-Scheduler](https://github.com/kai-scheduler/KAI-Scheduler/issues/1881). These are under review and not yet merged.
 
 ### Next
 
