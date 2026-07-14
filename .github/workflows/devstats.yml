@@ -18,8 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the push-retry rebase works
 
       - name: Refresh DevStats score in README
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
 
@@ -40,15 +44,39 @@ jobs:
           cur=$(grep -oE '\[\*\*[0-9,]+\*\*\]\(https://devstats\.cluster\.fun' README.md \
                 | grep -oE '[0-9,]+' | head -1 || true)
 
+          # Format-drift guard: if the number vanished from README, fail loudly
+          # instead of silently attempting an empty commit.
+          if [ -z "$cur" ]; then
+            echo "::error::could not locate the DevStats number in README (format changed?)"; exit 1
+          fi
+
           if [ "$fmt" = "$cur" ]; then
-            echo "DevStats unchanged ($cur) — nothing to commit."
-            exit 0
+            echo "DevStats unchanged ($cur) -- nothing to do."; exit 0
+          fi
+
+          # Sanity guard: DevStats is ~monotonic. A >20% drop is almost always a
+          # transient API recompute glitch, not a real change -- skip it.
+          curn=${cur//,/}
+          if [ "$new" -lt "$(( curn * 80 / 100 ))" ]; then
+            echo "::warning::DevStats dropped $cur -> $fmt (>20%); treating as API glitch, skipping."; exit 0
           fi
 
           echo "DevStats $cur -> $fmt"
           sed -i -E "s#\[\*\*[0-9,]+\*\*\]\(https://devstats\.cluster\.fun#[**${fmt}**](https://devstats.cluster.fun#g" README.md
 
+          # Only commit if the file actually changed.
+          if git diff --quiet -- README.md; then
+            echo "README unchanged after edit -- nothing to commit."; exit 0
+          fi
+
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -am "chore: refresh CNCF DevStats score to ${fmt}"
-          git push
+          git commit -m "chore: refresh CNCF DevStats score to ${fmt}" -- README.md
+
+          # Handle a manual push landing between checkout and push.
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "push failed (attempt $attempt); rebasing onto latest ${BRANCH}..."
+            git pull --rebase origin "$BRANCH"
+          done
+          echo "::error::git push failed after 3 attempts"; exit 1
