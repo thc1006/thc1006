@@ -2,8 +2,8 @@ name: Update CNCF DevStats score
 
 on:
   schedule:
-    # Daily at 06:17 UTC (odd minute avoids the top-of-hour scheduler backlog).
-    - cron: '17 6 * * *'
+    # Daily at 22:17 UTC = 06:17 Taiwan time (UTC+8); odd minute avoids the top-of-hour scheduler backlog.
+    - cron: '17 22 * * *'
   workflow_dispatch: {}
 
 permissions:
