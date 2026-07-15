@@ -13,7 +13,7 @@ Research assistant at National Yang Ming Chiao Tung University, Taiwan.
 |  |  |
 | --- | --- |
 | **CNCF DevStats** | [**1,834**](https://devstats.cluster.fun/?user=thc1006) |
-| **Merged upstream** | **100 pull requests across 47 projects.** 80 of them in 40 CNCF-hosted and Kubernetes-ecosystem repositories. |
+| **Merged upstream** | **101 pull requests across 47 projects.** 81 of them in 40 CNCF-hosted and Kubernetes-ecosystem repositories. |
 | **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) |
 | **Maintainer** | **M5Stack Platforms** in upstream Zephyr, `status: maintained` ([MAINTAINERS.yml](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml)) |
 | **Community** | Organizer of the *O-RAN in B5G/6G* track at COSCUP · I give technical talks in Taiwanese (Tâi-gí) |
@@ -26,7 +26,7 @@ Every merged contribution, listed and linked: **[open-source portfolio](https://
 
 I audit Dynamic Resource Allocation for arithmetic and lifecycle bugs. It began with an `int64` overflow in quota accounting, which I reported in [`kueue#12896`](https://github.com/kubernetes-sigs/kueue/issues/12896), fixed across four merged pull requests, then found and fixed in [Volcano](https://github.com/volcano-sh/volcano/pull/5621).
 
-The audit has since reached Kubernetes core, where I reported a counter-cache collision between DRA drivers in [`#140434`](https://github.com/kubernetes/kubernetes/issues/140434) and fixed it in [`#140435`](https://github.com/kubernetes/kubernetes/pull/140435), merged with a release note; and Intel's QAT DRA driver, where I reported a device leak on the claim-unprepare path ([`#73`](https://github.com/intel/intel-resource-drivers-for-kubernetes/issues/73)) and fixed it in [`#74`](https://github.com/intel/intel-resource-drivers-for-kubernetes/pull/74).
+The audit has since reached Kubernetes core, where I reported a counter-cache collision between DRA drivers ([`#140434`](https://github.com/kubernetes/kubernetes/issues/140434), fixed in [`#140435`](https://github.com/kubernetes/kubernetes/pull/140435)) and a reserved-state leak in the structured allocator's reject/backtrack path ([`#140436`](https://github.com/kubernetes/kubernetes/issues/140436), fixed in [`#140431`](https://github.com/kubernetes/kubernetes/pull/140431)), both merged with release notes; and Intel's QAT DRA driver, where I reported a device leak on the claim-unprepare path ([`#73`](https://github.com/intel/intel-resource-drivers-for-kubernetes/issues/73)) and fixed it in [`#74`](https://github.com/intel/intel-resource-drivers-for-kubernetes/pull/74).
 
 Still under review: two more core pull requests and four core issues, a slice-bounds panic in CNCF [container-device-interface](https://github.com/cncf-tags/container-device-interface/pull/321), a nil dereference in [KubeVirt](https://github.com/kubevirt/kubevirt/pull/18431), and quota-accounting problems in [KAI-Scheduler](https://github.com/kai-scheduler/KAI-Scheduler/issues/1881).
 
