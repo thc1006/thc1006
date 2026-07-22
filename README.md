@@ -4,6 +4,7 @@
 
 **Kubernetes scheduling and quota accounting · Observability · Cloud-native telecom**
 
+Member of the Kubernetes GitHub organization.
 Nephio Technical Steering Committee member (LF Networking).
 Maintainer of M5Stack Platforms in upstream Zephyr.
 Research assistant at National Yang Ming Chiao Tung University, Taiwan.
@@ -14,6 +15,7 @@ Research assistant at National Yang Ming Chiao Tung University, Taiwan.
 | --- | --- |
 | **CNCF DevStats** | [**1,966**](https://devstats.cluster.fun/?user=thc1006) |
 | **Merged upstream** | **115 pull requests across 50 projects.** 92 of them in 42 CNCF-hosted and Kubernetes-ecosystem repositories. |
+| **Kubernetes** | GitHub **org member** ([kubernetes/org#6498](https://github.com/kubernetes/org/issues/6498)) |
 | **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) |
 | **Maintainer** | **M5Stack Platforms** in upstream Zephyr, `status: maintained` ([MAINTAINERS.yml](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml)) |
 | **Community** | Organizer of the *O-RAN in B5G/6G* track at COSCUP · I give technical talks in Taiwanese (Tâi-gí) |
