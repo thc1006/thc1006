@@ -2,8 +2,10 @@ name: Update CNCF DevStats score
 
 on:
   schedule:
-    # Daily at 22:17 UTC = 06:17 Taiwan time (UTC+8); odd minute avoids the top-of-hour scheduler backlog.
-    - cron: '17 22 * * *'
+    # 官方 CNCF DevStats 每小時同步（比 GitHub Archive 落後至多 1h），不是每日單次。
+    # 每 3 小時於 :43 跑一次（過半小時、避開整點排程壅塞）：官方一更新，README 最多 ~3h 內跟上。
+    # unchanged 就跳過不 commit（見下方 guard），額外執行幾乎零成本。
+    - cron: '43 */3 * * *'
   workflow_dispatch: {}
 
 permissions:
