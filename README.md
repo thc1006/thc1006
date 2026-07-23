@@ -13,7 +13,7 @@ Research assistant at National Yang Ming Chiao Tung University, Taiwan.
 
 |  |  |
 | --- | --- |
-| **CNCF DevStats** | [**1,966**](https://devstats.cluster.fun/?user=thc1006) |
+| **CNCF DevStats** | [**2,000**](https://devstats.cluster.fun/?user=thc1006) |
 | **Merged upstream** | **117 pull requests across 51 projects.** 92 of them in 42 CNCF-hosted and Kubernetes-ecosystem repositories. |
 | **Kubernetes** | GitHub **org member** ([kubernetes/org#6498](https://github.com/kubernetes/org/issues/6498)) |
 | **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) |
