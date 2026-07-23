@@ -14,7 +14,7 @@ Research assistant at National Yang Ming Chiao Tung University, Taiwan.
 |  |  |
 | --- | --- |
 | **CNCF DevStats** | [**2,000**](https://devstats.cluster.fun/?user=thc1006) |
-| **Merged upstream** | **117 pull requests across 51 projects.** 92 of them in 42 CNCF-hosted and Kubernetes-ecosystem repositories. |
+| **Merged upstream** | **118 pull requests across 52 projects.** 93 of them in 40 CNCF-hosted and Kubernetes-ecosystem repositories. |
 | **Kubernetes** | GitHub **org member** ([kubernetes/org#6498](https://github.com/kubernetes/org/issues/6498)) |
 | **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) |
 | **Maintainer** | **M5Stack Platforms** in upstream Zephyr, `status: maintained` ([MAINTAINERS.yml](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml)) |
