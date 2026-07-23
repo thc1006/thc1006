@@ -38,6 +38,8 @@ My next focus is lowering the barrier from using cloud-native software to contri
 
 ---
 
+<div align="center">
+
 [Website](https://people.cs.nycu.edu.tw/~hctsai1006/) ·
 [Publications](https://people.cs.nycu.edu.tw/~hctsai1006/publications/) ·
 [Honors](https://people.cs.nycu.edu.tw/~hctsai1006/honors/) ·
@@ -46,5 +48,7 @@ My next focus is lowering the barrier from using cloud-native software to contri
 [LFX](https://openprofile.dev/profile/thc1006) ·
 [Credly](https://www.credly.com/users/hsiu-chi-tsai) ·
 hctsai@linux.com
+
+</div>
 
 <sub>Raised in a fishing village in Dapeng Bay, Pingtung. I care about making technical communities easier to enter, especially for people who do not start with an established professional network or English-first resources.</sub>
