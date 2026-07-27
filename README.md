@@ -4,21 +4,16 @@
 
 **Kubernetes scheduling and quota accounting · Observability · Cloud-native telecom**
 
-Member of the Kubernetes GitHub organization.
-Nephio Technical Steering Committee member (LF Networking).
-Member of the OpenTelemetry GitHub organization.
-Maintainer of M5Stack Platforms in upstream Zephyr.
-Research assistant at National Yang Ming Chiao Tung University, Taiwan.
-
 </div>
 
 |  |  |
 | --- | --- |
 | **CNCF DevStats** | [**2,005**](https://devstats.cluster.fun/?user=thc1006) |
 | **Merged upstream** | **125 pull requests across 54 projects.** 100 of them in 38 CNCF-hosted and Kubernetes-ecosystem repositories. |
-| **Kubernetes** | GitHub **org member** ([kubernetes/org#6498](https://github.com/kubernetes/org/issues/6498)) |
-| **Governance** | Nephio **TSC member**, LF Networking ([roster](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667)) |
-| **Maintainer** | **M5Stack Platforms** in upstream Zephyr, `status: maintained` ([MAINTAINERS.yml](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml)) |
+| **Kubernetes** | [**GitHub org member**](https://github.com/kubernetes/org/issues/6498) |
+| **Governance** | [**Nephio TSC member**](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667), LF Networking |
+| **OpenTelemetry** | [**GitHub org member**](https://github.com/open-telemetry/community/issues/3597) |
+| **Maintainer** | [**M5Stack Platforms**](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml) in upstream Zephyr, `status: maintained` |
 | **Community** | Organizer of the *O-RAN in B5G/6G* track at COSCUP · I give technical talks in Taiwanese (Tâi-gí) |
 
 Every merged contribution, listed and linked: **[open-source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/)**
@@ -52,4 +47,4 @@ hctsai@linux.com
 
 </div>
 
-<sub>Raised in a fishing village in Dapeng Bay, Pingtung. I care about making technical communities easier to enter, especially for people who do not start with an established professional network or English-first resources.</sub>
+<sub>Research assistant at National Yang Ming Chiao Tung University, Taiwan. Raised in a fishing village in Dapeng Bay, Pingtung. I care about making technical communities easier to enter, especially for people who do not start with an established professional network or English-first resources.</sub>
