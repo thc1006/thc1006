@@ -9,7 +9,7 @@
 |  |  |
 | --- | --- |
 | **CNCF DevStats** | [**2,005**](https://devstats.cluster.fun/?user=thc1006) |
-| **Merged upstream** | **125 pull requests across 54 projects.** 100 of them in 38 CNCF-hosted and Kubernetes-ecosystem repositories. |
+| **Merged upstream** | **126 pull requests across 55 projects.** 101 of them in 39 CNCF-hosted and Kubernetes-ecosystem repositories. |
 | **Kubernetes** | [**GitHub org member**](https://github.com/kubernetes/org/issues/6498) |
 | **Governance** | [**Nephio TSC member**](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667), LF Networking |
 | **OpenTelemetry** | [**GitHub org member**](https://github.com/open-telemetry/community/issues/3597) |
