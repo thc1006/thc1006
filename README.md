@@ -8,7 +8,7 @@
 
 |  |  |
 | --- | --- |
-| **CNCF DevStats** | [**2,047**](https://devstats.cluster.fun/?user=thc1006) |
+| **CNCF DevStats** | [**2,055**](https://devstats.cluster.fun/?user=thc1006) |
 | **Merged upstream** | **129 pull requests across 55 projects.** 104 of them in 39 CNCF-hosted and Kubernetes-ecosystem repositories. |
 | **Kubernetes** | [**GitHub org member**](https://github.com/kubernetes/org/issues/6498) |
 | **Governance** | [**Nephio TSC member**](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667), LF Networking |
