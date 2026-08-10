@@ -10,43 +10,91 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 30
     steps:
-      - name: Inspect official DevStats user registry and bulk export
+      - name: Collect official weekly DevActCnt history
         shell: bash
         run: |
           set -euo pipefail
-          ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/151 Safari/537.36'
-          base='https://all.devstats.cncf.io'
-          dash="$base/d/48/users-statistics-by-repository-group?orgId=1"
-          curl -fsS -L -A "$ua" -c /tmp/cookies.txt -o /tmp/dash.html -m 30 "$dash"
-          dsid=$(curl -fsS -A "$ua" -b /tmp/cookies.txt "$base/api/datasources/id/psql" | jq -r '.id')
+          cat > /tmp/weekly.py <<'PY'
+          import concurrent.futures
+          import datetime as dt
+          import json
+          import time
+          import urllib.error
+          import urllib.request
 
-          from_ms=$(date -u -d '2025-01-01 00:00:00' +%s%3N)
-          to_ms=$(date -u -d '2026-08-10 23:59:59' +%s%3N)
-          sql="select time, users_name from tusers where lower(users_name) in ('thc1006','hctsai1006') order by time"
-          jq -n --argjson dsid "$dsid" --arg sql "$sql" --arg from "$from_ms" --arg to "$to_ms" \
-            '{from:$from,to:$to,queries:[{refId:"A",intervalMs:86400000,maxDataPoints:100,datasourceId:$dsid,rawSql:$sql,format:"table"}]}' > /tmp/query.json
-          curl -fsS -A "$ua" -b /tmp/cookies.txt -o /tmp/query-response.json \
-            -X POST "$base/api/tsdb/query" -H 'Content-Type: application/json' --data-binary @/tmp/query.json -m 60
+          API = 'https://devstats.cncf.io/api/v1'
+          USER = 'thc1006'
 
-          python3 -m pip install --quiet --disable-pip-version-check pyarrow
-          python3 - <<'PY'
-          import base64, json
-          import pyarrow as pa, pyarrow.ipc as ipc
-          r=json.load(open('/tmp/query-response.json'))
-          for enc in r['results']['A'].get('dataframes') or []:
-              raw=base64.b64decode(enc)
-              for opener in (ipc.open_file, ipc.open_stream):
+          ranges = [(dt.date(2025,7,1), dt.date(2025,7,7))]
+          d = dt.date(2025,7,7)
+          end = dt.date(2026,8,9)
+          while d < end:
+              e = min(d + dt.timedelta(days=7), end)
+              ranges.append((d,e))
+              d = e
+
+          def one(pair):
+              a,b = pair
+              payload = {
+                  'api':'DevActCnt',
+                  'payload':{
+                      'project':'all',
+                      'range':f'range:{a.isoformat()},{b.isoformat()}',
+                      'metric':'Contributions',
+                      'repository_group':'All',
+                      'country':'All',
+                      'github_id':USER,
+                  }
+              }
+              body = json.dumps(payload).encode()
+              last = None
+              for attempt in range(2):
+                  t0=time.time()
+                  req=urllib.request.Request(API,data=body,headers={'Content-Type':'application/json'},method='POST')
                   try:
-                      t=opener(pa.BufferReader(raw)).read_all(); break
-                  except Exception: pass
-              print('=== TUSERS_MATCHES ===')
-              print(t.to_pydict())
-          PY
+                      with urllib.request.urlopen(req,timeout=190) as r:
+                          raw=r.read().decode('utf-8','replace')
+                          obj=json.loads(raw)
+                          nums=obj.get('number') or []
+                          value=int(nums[0]) if nums else 0
+                          return {'from':str(a),'to':str(b),'contributions':value,'http':r.status,'seconds':round(time.time()-t0,1),'status':'ok'}
+                  except urllib.error.HTTPError as e:
+                      raw=e.read().decode('utf-8','replace')
+                      try: obj=json.loads(raw)
+                      except Exception: obj={'error':raw}
+                      msg=str(obj.get('error',''))
+                      if e.code==400 and 'not found in results' in msg:
+                          return {'from':str(a),'to':str(b),'contributions':0,'http':400,'seconds':round(time.time()-t0,1),'status':'zero'}
+                      last=f'HTTP {e.code}: {msg}'
+                  except Exception as e:
+                      last=repr(e)
+                  if attempt == 0:
+                      time.sleep(4)
+              return {'from':str(a),'to':str(b),'contributions':None,'http':None,'seconds':None,'status':'error','error':last}
 
-          echo '=== CNCF annual bulk export ==='
-          code=$(curl -sS -L -A "$ua" -o /tmp/bulk.csv -w '%{http_code}' -m 30 \
-            https://devstats.cncf.io/backups/data_cncf_update_2025-07-01_2026-07-01.csv || true)
-          echo "HTTP $code bytes=$(wc -c </tmp/bulk.csv 2>/dev/null || echo 0)"
-          cat /tmp/bulk.csv
+          print(f'Collecting {len(ranges)} windows with max_workers=3', flush=True)
+          results=[]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex:
+              futs={ex.submit(one,r):r for r in ranges}
+              done=0
+              for fut in concurrent.futures.as_completed(futs):
+                  x=fut.result(); results.append(x); done+=1
+                  print(f'PROGRESS {done}/{len(ranges)} {x["from"]}..{x["to"]} = {x["contributions"]} ({x["status"]}, {x.get("seconds")}s)', flush=True)
+
+          results.sort(key=lambda x:x['from'])
+          print('=== DEVACTCNT_WEEKLY_CSV_BEGIN ===')
+          print('from,to,contributions,http,seconds,status')
+          for x in results:
+              print(f'{x["from"]},{x["to"]},{"" if x["contributions"] is None else x["contributions"]},{"" if x["http"] is None else x["http"]},{"" if x["seconds"] is None else x["seconds"]},{x["status"]}')
+          print('=== DEVACTCNT_WEEKLY_CSV_END ===')
+          print('=== DEVACTCNT_WEEKLY_JSON_BEGIN ===')
+          print(json.dumps(results,separators=(',',':')))
+          print('=== DEVACTCNT_WEEKLY_JSON_END ===')
+          errors=[x for x in results if x['status']=='error']
+          if errors:
+              print('ERROR_WINDOWS='+json.dumps(errors), flush=True)
+              raise SystemExit(2)
+          PY
+          python3 /tmp/weekly.py
