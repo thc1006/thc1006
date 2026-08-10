@@ -10,91 +10,42 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
-      - name: Collect official weekly DevActCnt history
+      - name: Read cached weekly Commits metric and current score
         shell: bash
         run: |
           set -euo pipefail
-          cat > /tmp/weekly.py <<'PY'
-          import concurrent.futures
-          import datetime as dt
-          import json
-          import time
-          import urllib.error
-          import urllib.request
+          cat > /tmp/metrics.py <<'PY'
+          import concurrent.futures, datetime as dt, json, urllib.error, urllib.request
+          API='https://devstats.cncf.io/api/v1'; USER='thc1006'
+          ranges=[(dt.date(2025,7,1),dt.date(2025,7,7))]
+          d=dt.date(2025,7,7); end=dt.date(2026,8,9)
+          while d<end:
+              e=min(d+dt.timedelta(days=7),end); ranges.append((d,e)); d=e
+          def one(p):
+              a,b=p
+              body=json.dumps({'api':'DevActCnt','payload':{'project':'all','range':f'range:{a},{b}','metric':'Commits','repository_group':'All','country':'All','github_id':USER}}).encode()
+              req=urllib.request.Request(API,data=body,headers={'Content-Type':'application/json'},method='POST')
+              try:
+                  with urllib.request.urlopen(req,timeout=60) as r:
+                      o=json.loads(r.read()); n=o.get('number') or []
+                      return str(a),str(b),int(n[0]) if n else 0
+              except urllib.error.HTTPError as e:
+                  raw=e.read().decode('utf-8','replace')
+                  if e.code==400 and 'not found in results' in raw: return str(a),str(b),0
+                  raise
+          with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
+              rows=sorted(ex.map(one,ranges))
+          print('=== COMMITS_WEEKLY_CSV_BEGIN ===')
+          print('from,to,commits')
+          for a,b,n in rows: print(f'{a},{b},{n}')
+          print('=== COMMITS_WEEKLY_CSV_END ===')
 
-          API = 'https://devstats.cncf.io/api/v1'
-          USER = 'thc1006'
-
-          ranges = [(dt.date(2025,7,1), dt.date(2025,7,7))]
-          d = dt.date(2025,7,7)
-          end = dt.date(2026,8,9)
-          while d < end:
-              e = min(d + dt.timedelta(days=7), end)
-              ranges.append((d,e))
-              d = e
-
-          def one(pair):
-              a,b = pair
-              payload = {
-                  'api':'DevActCnt',
-                  'payload':{
-                      'project':'all',
-                      'range':f'range:{a.isoformat()},{b.isoformat()}',
-                      'metric':'Contributions',
-                      'repository_group':'All',
-                      'country':'All',
-                      'github_id':USER,
-                  }
-              }
-              body = json.dumps(payload).encode()
-              last = None
-              for attempt in range(2):
-                  t0=time.time()
-                  req=urllib.request.Request(API,data=body,headers={'Content-Type':'application/json'},method='POST')
-                  try:
-                      with urllib.request.urlopen(req,timeout=190) as r:
-                          raw=r.read().decode('utf-8','replace')
-                          obj=json.loads(raw)
-                          nums=obj.get('number') or []
-                          value=int(nums[0]) if nums else 0
-                          return {'from':str(a),'to':str(b),'contributions':value,'http':r.status,'seconds':round(time.time()-t0,1),'status':'ok'}
-                  except urllib.error.HTTPError as e:
-                      raw=e.read().decode('utf-8','replace')
-                      try: obj=json.loads(raw)
-                      except Exception: obj={'error':raw}
-                      msg=str(obj.get('error',''))
-                      if e.code==400 and 'not found in results' in msg:
-                          return {'from':str(a),'to':str(b),'contributions':0,'http':400,'seconds':round(time.time()-t0,1),'status':'zero'}
-                      last=f'HTTP {e.code}: {msg}'
-                  except Exception as e:
-                      last=repr(e)
-                  if attempt == 0:
-                      time.sleep(4)
-              return {'from':str(a),'to':str(b),'contributions':None,'http':None,'seconds':None,'status':'error','error':last}
-
-          print(f'Collecting {len(ranges)} windows with max_workers=3', flush=True)
-          results=[]
-          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex:
-              futs={ex.submit(one,r):r for r in ranges}
-              done=0
-              for fut in concurrent.futures.as_completed(futs):
-                  x=fut.result(); results.append(x); done+=1
-                  print(f'PROGRESS {done}/{len(ranges)} {x["from"]}..{x["to"]} = {x["contributions"]} ({x["status"]}, {x.get("seconds")}s)', flush=True)
-
-          results.sort(key=lambda x:x['from'])
-          print('=== DEVACTCNT_WEEKLY_CSV_BEGIN ===')
-          print('from,to,contributions,http,seconds,status')
-          for x in results:
-              print(f'{x["from"]},{x["to"]},{"" if x["contributions"] is None else x["contributions"]},{"" if x["http"] is None else x["http"]},{"" if x["seconds"] is None else x["seconds"]},{x["status"]}')
-          print('=== DEVACTCNT_WEEKLY_CSV_END ===')
-          print('=== DEVACTCNT_WEEKLY_JSON_BEGIN ===')
-          print(json.dumps(results,separators=(',',':')))
-          print('=== DEVACTCNT_WEEKLY_JSON_END ===')
-          errors=[x for x in results if x['status']=='error']
-          if errors:
-              print('ERROR_WINDOWS='+json.dumps(errors), flush=True)
-              raise SystemExit(2)
+          body=json.dumps({'api':'GithubIDContributions','payload':{'github_id':USER}}).encode()
+          req=urllib.request.Request(API,data=body,headers={'Content-Type':'application/json'},method='POST')
+          with urllib.request.urlopen(req,timeout=60) as r:
+              print('=== CURRENT_SCORE ===')
+              print(r.read().decode())
           PY
-          python3 /tmp/weekly.py
+          python3 /tmp/metrics.py
