@@ -10,68 +10,29 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
-      - name: Query and decode official All CNCF weekly user contributions
+      - name: Cross-check known weeks through official DevActCnt API
         shell: bash
         run: |
           set -euo pipefail
-          ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/151 Safari/537.36'
-          base='https://all.devstats.cncf.io'
-          dash="$base/d/48/users-statistics-by-repository-group?orgId=1&from=1751241600000&to=1786406399000&var-period=w&var-metric=contributions&var-repogroup_name=All&var-users=thc1006"
-          curl -fsS -L -A "$ua" -c /tmp/cookies.txt -o /tmp/dash.html -m 30 "$dash"
+          api='https://devstats.cncf.io/api/v1'
 
-          dsid=$(curl -fsS -A "$ua" -b /tmp/cookies.txt "$base/api/datasources/id/psql" | jq -r '.id')
-          echo "Datasource id: $dsid"
+          query_week() {
+            local from="$1" to="$2"
+            local payload out code start end
+            payload=$(jq -nc --arg r "range:${from},${to}" '{api:"DevActCnt",payload:{project:"all",range:$r,metric:"Contributions",repository_group:"All",country:"All",github_id:"thc1006"}}')
+            out="/tmp/${from}_${to}.json"
+            start=$(date +%s)
+            code=$(curl -sS --retry 1 --retry-delay 2 -m 180 -o "$out" -w '%{http_code}' \
+              -X POST "$api" -H 'Content-Type: application/json' -d "$payload" || true)
+            end=$(date +%s)
+            echo "=== DEVACTCNT ${from} ${to} HTTP=${code} elapsed=$((end-start))s ==="
+            cat "$out" | jq . || cat "$out"
+          }
 
-          from_ms=$(date -u -d '2025-06-23 00:00:00' +%s%3N)
-          to_ms=$(date -u -d '2026-08-10 23:59:59' +%s%3N)
-          sql='select time, "thc1006" as contributions from suser_activity where time >= '\''2025-06-23'\'' and time < '\''2026-08-11'\'' and period = '\''w'\'' and series = '\''userallcontributions'\'' order by time'
-          jq -n --argjson dsid "$dsid" --arg sql "$sql" --arg from "$from_ms" --arg to "$to_ms" \
-            '{from:$from,to:$to,queries:[{refId:"A",intervalMs:604800000,maxDataPoints:200,datasourceId:$dsid,rawSql:$sql,format:"time_series"}]}' > /tmp/query.json
-
-          qcode=$(curl -sS -A "$ua" -b /tmp/cookies.txt -o /tmp/query-response.json -w '%{http_code}' \
-            -X POST "$base/api/tsdb/query" -H 'Accept: application/json' -H 'Content-Type: application/json' \
-            --data-binary @/tmp/query.json -m 90)
-          echo "Grafana query HTTP $qcode"
-          test "$qcode" = 200
-
-          python3 -m pip install --quiet --disable-pip-version-check pyarrow
-          python3 - <<'PY'
-          import base64, json
-          import pyarrow as pa
-          import pyarrow.ipc as ipc
-
-          with open('/tmp/query-response.json', encoding='utf-8') as f:
-              response = json.load(f)
-          frames = response['results']['A'].get('dataframes') or []
-          if not frames:
-              raise SystemExit('No Arrow dataframes returned')
-
-          rows = []
-          for encoded in frames:
-              raw = base64.b64decode(encoded)
-              buf = pa.BufferReader(raw)
-              try:
-                  reader = ipc.open_file(buf)
-                  table = reader.read_all()
-              except Exception:
-                  buf = pa.BufferReader(raw)
-                  reader = ipc.open_stream(buf)
-                  table = reader.read_all()
-              data = table.to_pydict()
-              names = table.column_names
-              print('Arrow columns:', names)
-              if len(names) < 2:
-                  continue
-              for t, v in zip(data[names[0]], data[names[1]]):
-                  rows.append((t, v))
-
-          print('=== DEVSTATS_WEEKLY_CSV_BEGIN ===')
-          print('time,contributions')
-          for t, v in rows:
-              if hasattr(t, 'isoformat'):
-                  t = t.isoformat()
-              print(f'{t},{"" if v is None else v}')
-          print('=== DEVSTATS_WEEKLY_CSV_END ===')
-          PY
+          # A week around the first clearly documented thc1006 upstream merges,
+          # a high-activity June/July 2026 week, and a current week for calibration.
+          query_week 2025-09-29 2025-10-06
+          query_week 2026-06-29 2026-07-06
+          query_week 2026-08-03 2026-08-09
