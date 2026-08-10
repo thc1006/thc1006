@@ -10,29 +10,43 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     steps:
-      - name: Cross-check known weeks through official DevActCnt API
+      - name: Inspect official DevStats user registry and bulk export
         shell: bash
         run: |
           set -euo pipefail
-          api='https://devstats.cncf.io/api/v1'
+          ua='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/151 Safari/537.36'
+          base='https://all.devstats.cncf.io'
+          dash="$base/d/48/users-statistics-by-repository-group?orgId=1"
+          curl -fsS -L -A "$ua" -c /tmp/cookies.txt -o /tmp/dash.html -m 30 "$dash"
+          dsid=$(curl -fsS -A "$ua" -b /tmp/cookies.txt "$base/api/datasources/id/psql" | jq -r '.id')
 
-          query_week() {
-            local from="$1" to="$2"
-            local payload out code start end
-            payload=$(jq -nc --arg r "range:${from},${to}" '{api:"DevActCnt",payload:{project:"all",range:$r,metric:"Contributions",repository_group:"All",country:"All",github_id:"thc1006"}}')
-            out="/tmp/${from}_${to}.json"
-            start=$(date +%s)
-            code=$(curl -sS --retry 1 --retry-delay 2 -m 180 -o "$out" -w '%{http_code}' \
-              -X POST "$api" -H 'Content-Type: application/json' -d "$payload" || true)
-            end=$(date +%s)
-            echo "=== DEVACTCNT ${from} ${to} HTTP=${code} elapsed=$((end-start))s ==="
-            cat "$out" | jq . || cat "$out"
-          }
+          from_ms=$(date -u -d '2025-01-01 00:00:00' +%s%3N)
+          to_ms=$(date -u -d '2026-08-10 23:59:59' +%s%3N)
+          sql="select time, users_name from tusers where lower(users_name) in ('thc1006','hctsai1006') order by time"
+          jq -n --argjson dsid "$dsid" --arg sql "$sql" --arg from "$from_ms" --arg to "$to_ms" \
+            '{from:$from,to:$to,queries:[{refId:"A",intervalMs:86400000,maxDataPoints:100,datasourceId:$dsid,rawSql:$sql,format:"table"}]}' > /tmp/query.json
+          curl -fsS -A "$ua" -b /tmp/cookies.txt -o /tmp/query-response.json \
+            -X POST "$base/api/tsdb/query" -H 'Content-Type: application/json' --data-binary @/tmp/query.json -m 60
 
-          # A week around the first clearly documented thc1006 upstream merges,
-          # a high-activity June/July 2026 week, and a current week for calibration.
-          query_week 2025-09-29 2025-10-06
-          query_week 2026-06-29 2026-07-06
-          query_week 2026-08-03 2026-08-09
+          python3 -m pip install --quiet --disable-pip-version-check pyarrow
+          python3 - <<'PY'
+          import base64, json
+          import pyarrow as pa, pyarrow.ipc as ipc
+          r=json.load(open('/tmp/query-response.json'))
+          for enc in r['results']['A'].get('dataframes') or []:
+              raw=base64.b64decode(enc)
+              for opener in (ipc.open_file, ipc.open_stream):
+                  try:
+                      t=opener(pa.BufferReader(raw)).read_all(); break
+                  except Exception: pass
+              print('=== TUSERS_MATCHES ===')
+              print(t.to_pydict())
+          PY
+
+          echo '=== CNCF annual bulk export ==='
+          code=$(curl -sS -L -A "$ua" -o /tmp/bulk.csv -w '%{http_code}' -m 30 \
+            https://devstats.cncf.io/backups/data_cncf_update_2025-07-01_2026-07-01.csv || true)
+          echo "HTTP $code bytes=$(wc -c </tmp/bulk.csv 2>/dev/null || echo 0)"
+          cat /tmp/bulk.csv
