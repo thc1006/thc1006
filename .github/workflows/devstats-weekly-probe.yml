@@ -20,31 +20,33 @@ jobs:
           base='https://all.devstats.cncf.io'
           dash="$base/d/48/users-statistics-by-repository-group?orgId=1&from=1751241600000&to=1786406399000&var-period=w&var-metric=contributions&var-repogroup_name=All&var-users=thc1006"
 
-          echo '=== Establish dashboard session ==='
-          code=$(curl -sS -L -A "$ua" -c /tmp/cookies.txt -D /tmp/dash.headers \
-            -o /tmp/dash.html -w '%{http_code}' -m 30 "$dash" || true)
-          echo "dashboard HTTP $code bytes=$(wc -c </tmp/dash.html 2>/dev/null || echo 0)"
-          sed -n '1,20p' /tmp/dash.headers || true
-          echo 'cookies:'
-          sed -e '/^#/d' /tmp/cookies.txt | awk '{print $1,$2,$3,$4,$5,$6,"<redacted>"}' || true
+          curl -fsS -L -A "$ua" -c /tmp/cookies.txt -o /tmp/dash.html -m 30 "$dash"
+          curl -fsS -A "$ua" -b /tmp/cookies.txt -o /tmp/dashboard.json -m 30 "$base/api/dashboards/uid/48"
 
-          echo '=== Dashboard API ==='
-          for endpoint in '/api/dashboards/uid/48' '/api/datasources'; do
-            out="/tmp/$(echo "$endpoint" | tr '/' '_').json"
-            c=$(curl -sS -A "$ua" -b /tmp/cookies.txt -D /tmp/api.headers \
-              -o "$out" -w '%{http_code}' -m 30 "$base$endpoint" || true)
-            echo "$endpoint HTTP $c"
-            head -c 1200 "$out" || true; echo
+          echo '=== Datasource references in dashboard ==='
+          jq -r '.. | objects | .datasource? // empty' /tmp/dashboard.json | sort -u | head -30
+          echo '=== Panel target for suser_activity ==='
+          jq -c '.. | objects | select((.rawSql? // "") | contains("suser_activity")) | {datasource,refId,format,rawSql}' /tmp/dashboard.json | head -10
+
+          echo '=== Specific datasource endpoints ==='
+          for endpoint in '/api/datasources/id/psql' '/api/datasources/name/psql' '/api/datasources/uid/psql'; do
+            out="/tmp/ds$(echo "$endpoint" | tr '/' '_').json"
+            code=$(curl -sS -A "$ua" -b /tmp/cookies.txt -o "$out" -w '%{http_code}' -m 30 "$base$endpoint" || true)
+            echo "$endpoint HTTP $code"
+            cat "$out"; echo
           done
 
-          if ! jq -e 'type=="array"' /tmp/_api_datasources.json >/dev/null 2>&1; then
-            echo '::error::Datasource API unavailable to anonymous dashboard session'
-            exit 1
-          fi
-
-          uid=$(jq -r '[.[] | select(.type=="postgres" and .isDefault==true)][0].uid // [.[] | select(.type=="postgres")][0].uid // empty' /tmp/_api_datasources.json)
-          echo "Using datasource UID: $uid"
-          test -n "$uid"
+          uid=''
+          for f in /tmp/ds_api_datasources_name_psql.json /tmp/ds_api_datasources_uid_psql.json; do
+            if [ -f "$f" ]; then
+              x=$(jq -r '.uid // empty' "$f" 2>/dev/null || true)
+              [ -z "$x" ] || { uid="$x"; break; }
+            fi
+          done
+          # Provisioned DevStats datasource commonly uses psql as both name and uid;
+          # try that if metadata is intentionally hidden from anonymous viewers.
+          [ -n "$uid" ] || uid='psql'
+          echo "Trying datasource UID: $uid"
 
           from_ms=$(date -u -d '2025-06-23 00:00:00' +%s%3N)
           to_ms=$(date -u -d '2026-08-10 23:59:59' +%s%3N)
@@ -52,12 +54,17 @@ jobs:
           jq -n --arg uid "$uid" --arg sql "$sql" --arg from "$from_ms" --arg to "$to_ms" \
             '{from:$from,to:$to,queries:[{refId:"A",datasource:{uid:$uid,type:"postgres"},rawSql:$sql,format:"table"}]}' > /tmp/query.json
 
-          echo '=== Grafana query ==='
-          qcode=$(curl -sS -A "$ua" -b /tmp/cookies.txt -o /tmp/query-response.json -w '%{http_code}' \
-            -X POST "$base/api/ds/query" -H 'Content-Type: application/json' --data-binary @/tmp/query.json -m 60 || true)
-          echo "query HTTP $qcode"
-          cat /tmp/query-response.json | jq . || cat /tmp/query-response.json
-          test "$qcode" = 200
-          echo '=== DEVSTATS_WEEKLY_RESULT_BEGIN ==='
-          jq -c '.results.A.frames[]?.data.values' /tmp/query-response.json
-          echo '=== DEVSTATS_WEEKLY_RESULT_END ==='
+          for qendpoint in '/api/ds/query' '/api/tsdb/query'; do
+            echo "=== Query $qendpoint ==="
+            qcode=$(curl -sS -A "$ua" -b /tmp/cookies.txt -o /tmp/query-response.json -w '%{http_code}' \
+              -X POST "$base$qendpoint" -H 'Content-Type: application/json' --data-binary @/tmp/query.json -m 60 || true)
+            echo "HTTP $qcode"
+            cat /tmp/query-response.json | jq . || cat /tmp/query-response.json
+            if [ "$qcode" = 200 ] && jq -e '.results.A.frames | length > 0' /tmp/query-response.json >/dev/null 2>&1; then
+              echo '=== DEVSTATS_WEEKLY_RESULT_BEGIN ==='
+              jq -c '.results.A.frames[]?.data.values' /tmp/query-response.json
+              echo '=== DEVSTATS_WEEKLY_RESULT_END ==='
+              exit 0
+            fi
+          done
+          exit 1
