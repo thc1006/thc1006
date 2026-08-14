@@ -2,10 +2,10 @@ name: Update CNCF DevStats score
 
 on:
   schedule:
-    # 官方 CNCF DevStats 每小時同步（比 GitHub Archive 落後至多 1h），不是每日單次。
-    # 每天 3 次（00/08/16 時的 :43，UTC）：官方更新後 README 最多 ~8h 內跟上。
-    # unchanged 就跳過不 commit（見下方 guard），額外執行幾乎零成本。
-    - cron: '43 0,8,16 * * *'
+    # 官方 CNCF DevStats 每小時同步。排程：每天 08:00 與 20:00（台北 UTC+8）= 00:00 / 12:00 UTC，
+    # 即「早上八點固定一次 + 每 12 小時一次」。unchanged 就跳過不 commit（見下方 guard）。
+    # 註：GitHub 排程為 best-effort，實際觸發可能延遲數分鐘。
+    - cron: '0 0,12 * * *'
   workflow_dispatch: {}
 
 permissions:
