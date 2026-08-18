@@ -2,11 +2,12 @@ name: Update CNCF DevStats score
 
 on:
   schedule:
-    # 官方 CNCF DevStats 每小時同步。排程：每天 08:23 與 20:23（台北 UTC+8）= 00:23 / 12:23 UTC，
-    # 即「早上八點一帶固定一次 + 每 12 小時一次」。unchanged 就跳過不 commit（見下方 guard）。
-    # 註：GitHub 排程為 best-effort；整點（尤其午夜 UTC）最壅塞，分鐘刻意錯開為 :23 以避開尖峰、縮短排隊
-    #     （GitHub 官方建議避開整點）。仍可能延遲，但 unchanged guard 讓延遲無害。
-    - cron: '23 0,12 * * *'
+    # 為什麼每小時：CNCF DevStats 的 GithubIDContributions API 會把「單一使用者」的值在記憶體
+    # 快取 24 小時（devstatscode: GithubIDContributionsCacheTTL = 86400）；底層 DB 才是每小時
+    # 從 GH Archive 同步。所以真正的數字大約每天才跳一次、且跳的時刻不固定。
+    # 每小時輪詢（分鐘 :17、避開整點壅塞）＝ 那個 24h 快取一過期、值一變，最慢一小時內就寫進 README，
+    # 保證早上起床看到的就是最新值。idempotent：值沒變不 commit，所以實際每天只 commit 約一次、不洗版。
+    - cron: '17 * * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -19,10 +20,11 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history so the push-retry rebase works
+          fetch-depth: 0   # 完整歷史，讓下方 push 失敗時的 rebase 重試可用
 
       - name: Refresh DevStats score in README
         env:
@@ -30,44 +32,47 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Query the official CNCF DevStats API (same call the devstats-viewer makes).
-          new=$(curl -sf --retry 3 --retry-delay 5 -m 30 \
+          # 官方 CNCF DevStats API（devstats-viewer 打的同一支；固定查全 CNCF 的 all/allprj DB）。
+          # 抓失敗（網路 / HTTP 錯誤）→ 溫和跳過、不把 run 標紅，下一小時自動重試。
+          new=$(curl -sf --retry 3 --retry-delay 5 --retry-connrefused -m 30 \
             -X POST https://devstats.cncf.io/api/v1 \
             -H 'Content-Type: application/json' \
             -d '{"api":"GithubIDContributions","payload":{"github_id":"thc1006"}}' \
-            | jq -r '.contributions')
+            | jq -r '.contributions') || {
+              echo "::warning::DevStats API fetch failed; skipping (next hourly run retries)."; exit 0;
+            }
 
-          # Fail closed: only ever write a clean positive integer.
-          case "$new" in
-            ''|*[!0-9]*) echo "::error::unexpected DevStats value: '$new'"; exit 1 ;;
+          # 值不是乾淨正整數 → 多半是 API 暫時回錯，跳過等下一輪（不標紅）。
+          case "${new:-}" in
+            ''|*[!0-9]*) echo "::warning::unexpected DevStats value '${new:-}'; skipping."; exit 0 ;;
           esac
-          [ "$new" -gt 0 ] || { echo "::error::non-positive DevStats score"; exit 1; }
+          [ "$new" -gt 0 ] || { echo "::warning::non-positive DevStats score; skipping."; exit 0; }
 
-          fmt=$(python3 -c "print(f'{$new:,}')")
+          # 千分位格式化：用 python3（locale 無關，ubuntu-latest 內建），值以 argv 傳入不進 source。
+          fmt=$(python3 -c 'import sys; print(f"{int(sys.argv[1]):,}")' "$new")
+
+          # 從 README 讀目前顯示值（錨定 devstats 連結）。
           cur=$(grep -oE '\[\*\*[0-9,]+\*\*\]\(https://devstats\.cluster\.fun' README.md \
                 | grep -oE '[0-9,]+' | head -1 || true)
 
-          # Format-drift guard: if the number vanished from README, fail loudly
-          # instead of silently attempting an empty commit.
+          # 找不到 ＝ README 版型漂移，這是真的壞了、要大聲（hard fail），而不是靜靜不更新。
           if [ -z "$cur" ]; then
-            echo "::error::could not locate the DevStats number in README (format changed?)"; exit 1
+            echo "::error::could not locate the DevStats number in README (format drift?)"; exit 1
           fi
 
           if [ "$fmt" = "$cur" ]; then
             echo "DevStats unchanged ($cur) -- nothing to do."; exit 0
           fi
 
-          # Sanity guard: DevStats is ~monotonic. A >20% drop is almost always a
-          # transient API recompute glitch, not a real change -- skip it.
+          # DevStats ~單調遞增；>20% 驟降幾乎都是 API recompute 途中的暫態，跳過不寫。
           curn=${cur//,/}
           if [ "$new" -lt "$(( curn * 80 / 100 ))" ]; then
-            echo "::warning::DevStats dropped $cur -> $fmt (>20%); treating as API glitch, skipping."; exit 0
+            echo "::warning::DevStats dropped $cur -> $fmt (>20%); treating as glitch, skipping."; exit 0
           fi
 
           echo "DevStats $cur -> $fmt"
           sed -i -E "s#\[\*\*[0-9,]+\*\*\]\(https://devstats\.cluster\.fun#[**${fmt}**](https://devstats.cluster.fun#g" README.md
 
-          # Only commit if the file actually changed.
           if git diff --quiet -- README.md; then
             echo "README unchanged after edit -- nothing to commit."; exit 0
           fi
@@ -76,7 +81,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m "chore: refresh CNCF DevStats score to ${fmt}" -- README.md
 
-          # Handle a manual push landing between checkout and push.
+          # 手動 commit 可能卡在 checkout 與 push 之間 → rebase 後重試。
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
             echo "push failed (attempt $attempt); rebasing onto latest ${BRANCH}..."
