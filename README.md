@@ -2,47 +2,45 @@
 
 # Hsiu-Chi Tsai · 蔡秀吉
 
-**Upstream systems engineer · Kubernetes correctness · Observability · Cloud native telecom**
+**upstream systems engineer. i work on Kubernetes correctness, observability, and cloud native telecom.**
 
-I turn individual defects into reusable system invariants, search for their variants across projects, and carry the fixes through regression tests to upstream merge.
+my way is simple. i find one bug, then i make it into a rule i can use again, and i go check other projects if they have the same bug. after i fix it i add a test and send it to upstream.
 
 </div>
 
 |  |  |
 | --- | --- |
-| **Merged upstream** | **240 pull requests across 68 projects.** 169 of them in 44 CNCF hosted and Kubernetes ecosystem repositories. |
+| **Merged upstream** | **240 pull requests in 68 projects.** 169 of them are in 44 CNCF and Kubernetes ecosystem repos. |
 | **CNCF related contributions** | [**3,782**](https://devstats.cluster.fun/?user=thc1006) |
 | **Kubernetes** | [**GitHub org member**](https://github.com/kubernetes/org/issues/6498) |
 | **Governance** | [**Nephio TSC member**](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667), LF Networking |
 | **OpenTelemetry** | [**GitHub org member**](https://github.com/open-telemetry/community/issues/3597) |
 | **Maintainer** | [**M5Stack Platforms**](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml) in upstream Zephyr, `status: maintained` |
 
-Every merged contribution, listed and linked: **[open source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/)**
+every merged PR is listed and linked here: **[open source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/)**
 
-<sub>The CNCF related contribution count refreshes automatically via GitHub Actions from CNCF DevStats' <code>GithubIDContributions</code> API. It is a contribution count, not a weighted score. Other figures are authored, merged, public upstream pull requests, reconciled August 2026.</sub>
+<sub>the CNCF number update by itself from CNCF DevStats GithubIDContributions API. it is a count of contributions, not a score. the other numbers are my authored, merged, public upstream PR, and i check them again in August 2026.</sub>
 
-### How I work
+### what i work on
 
-Three engineering campaigns. Each starts from one defect, generalizes into a review invariant, then searches for that invariant's variants across projects.
-
-**Resource accounting and Kubernetes DRA.** Schedulers and device allocation paths audited against arithmetic and state invariants: sums, products, conversions, reservations, rollback, and persisted allocations must not overflow, truncate, leak, or be charged twice. Five structured DRA allocator defects fixed and merged for Kubernetes v1.37: driver and pool cache isolation, reliable backtracking rollback, no double charge on persisted shared devices, unusable `validRange` rejection, and unrepresentable capacity rejection. The same variant search then ran across Kueue, Volcano, CDI, and vendor DRA drivers (Intel QAT, Google TPU, IBM Power, AMD ROCm).
+most of my work is Kubernetes DRA correctness. i read the scheduler and device allocation code and i check the math and the state: sum, product, convert, reserve, rollback, and saved allocation. they should not overflow, truncate, leak, or charge twice. i find and fix five bug of this kind in the Kubernetes v1.37 allocator: driver and pool cache mix together, rollback not clean after backtrack, double charge on a saved shared device, bad `validRange` not reject, and too big capacity not reject. after that i use the same check on other project too, like Kueue, Volcano, CDI, and vendor DRA driver from Intel QAT, Google TPU, IBM Power, and AMD ROCm.
 [k8s #140435](https://github.com/kubernetes/kubernetes/pull/140435) · [#140431](https://github.com/kubernetes/kubernetes/pull/140431) · [#140437](https://github.com/kubernetes/kubernetes/pull/140437) · [#140666](https://github.com/kubernetes/kubernetes/pull/140666) · [#140442](https://github.com/kubernetes/kubernetes/pull/140442)
 
-**Async lifecycle and observability.** OpenTelemetry C++ exporters reviewed by lifecycle contract: an operation must not outlive its owner, miss its completion notification, or be settled zero or two times under cancellation and shutdown races.
-[HttpServer use after free #4289](https://github.com/open-telemetry/opentelemetry-cpp/pull/4289) · [ES exporter lost wakeup #4298](https://github.com/open-telemetry/opentelemetry-cpp/pull/4298) · [curl exactly once completion #4363](https://github.com/open-telemetry/opentelemetry-cpp/pull/4363)
+for observability i review OpenTelemetry C++ exporter by its lifecycle. one operation should not live longer than its owner, should not miss the finish signal, and should not settle zero time or two time when cancel and shutdown race together.
+[HttpServer use after free #4289](https://github.com/open-telemetry/opentelemetry-cpp/pull/4289) · [ES exporter lost wakeup #4298](https://github.com/open-telemetry/opentelemetry-cpp/pull/4298) · [curl settle one time #4363](https://github.com/open-telemetry/opentelemetry-cpp/pull/4363)
 
-**Transactional cloud native telecom.** NTN control paths in OCUDU treated as one transaction rather than isolated bugs. A SIB19 update is audited end to end across coroutine lifetimes, queue backpressure, validation, rollback, timing boundaries, and system information assembly, then carried through Nephio governance and upstream merge requests.
+for telecom i work on the OCUDU NTN control path. i treat one SIB19 update as one transaction, not many small bug. i check it from start to end: coroutine lifetime, queue backpressure, validation, rollback, timing boundary, and system information assembly. this work go through Nephio governance and upstream merge request.
 
-Full failure analyses, patches, tests, and review threads are in the [open source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/). Active work is tracked through my [open pull requests](https://github.com/search?q=is%3Apr+author%3Athc1006+is%3Aopen&type=pullrequests).
+the full analysis, the patch, the test and the review talk are all in my [open source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/). what i do right now is in my [open pull requests](https://github.com/search?q=is%3Apr+author%3Athc1006+is%3Aopen&type=pullrequests).
 
-### Verified credential
+### one certificate i have
 
-**AMD ROCm™ Certified Associate**, issued by AMD. Covers ROCm software application development, optimization, and deployment of AI and HPC workloads on AMD Instinct GPUs.
-[Verify on Credly](https://www.credly.com/badges/4c7dbe32-9ee7-4c15-8919-9f4dccd81383) · [related ROCm upstream work](https://github.com/ROCm/k8s-gpu-dra-driver/pulls?q=is%3Apr+author%3Athc1006)
+**AMD ROCm™ Certified Associate**, from AMD. it is about ROCm software develop, optimize, and deploy for AI and HPC work on AMD Instinct GPU.
+[verify on Credly](https://www.credly.com/badges/4c7dbe32-9ee7-4c15-8919-9f4dccd81383) · [my ROCm upstream work](https://github.com/ROCm/k8s-gpu-dra-driver/pulls?q=is%3Apr+author%3Athc1006)
 
-### Community
+### community
 
-I serve on the Nephio Technical Steering Committee, maintain M5Stack platforms in upstream Zephyr, and organize the *O-RAN in B5G/6G* track at COSCUP. I give technical talks in Taiwanese, and am building bilingual, review based contribution walkthroughs to lower the barrier from using cloud native software to contributing upstream. Completed **LFC102: Inclusive Open Source Community Orientation** in July 2026.
+i am on the Nephio Technical Steering Committee, i maintain the M5Stack platform in upstream Zephyr, and i run the *O-RAN in B5G/6G* track in COSCUP. i give tech talk in Taiwanese. i also make bilingual walkthrough from real review talk, because i want the step from use to contribute more easy. i finish **LFC102: Inclusive Open Source Community Orientation** in July 2026.
 
 ---
 
@@ -59,4 +57,4 @@ hctsai@linux.com
 
 </div>
 
-<sub>Research assistant at National Yang Ming Chiao Tung University, Taiwan. Raised in a fishing village in Dapeng Bay, Pingtung. I care about making technical communities easier to enter, especially for people who do not start with an established professional network or English first resources.</sub>
+<sub>i am a research assistant in National Yang Ming Chiao Tung University, Taiwan. i grow up in a small fishing village in Dapeng Bay, Pingtung. i care about make the technical community easy to enter, specially for people who do not start with a big network or English first resource.</sub>
