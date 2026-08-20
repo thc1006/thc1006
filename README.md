@@ -2,37 +2,47 @@
 
 # Hsiu-Chi Tsai · 蔡秀吉
 
-**Kubernetes scheduling and quota accounting · Observability · Cloud-native telecom**
+**Upstream systems engineer · Kubernetes correctness · Observability · Cloud-native telecom**
+
+I turn individual defects into reusable system invariants, search for their variants across projects, and carry the fixes through regression tests to upstream merge.
 
 </div>
 
 |  |  |
 | --- | --- |
-| **CNCF DevStats** | [**3,782**](https://devstats.cluster.fun/?user=thc1006) |
 | **Merged upstream** | **240 pull requests across 68 projects.** 169 of them in 44 CNCF-hosted and Kubernetes-ecosystem repositories. |
+| **CNCF-related contributions** | [**3,782**](https://devstats.cluster.fun/?user=thc1006) |
 | **Kubernetes** | [**GitHub org member**](https://github.com/kubernetes/org/issues/6498) |
 | **Governance** | [**Nephio TSC member**](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667), LF Networking |
 | **OpenTelemetry** | [**GitHub org member**](https://github.com/open-telemetry/community/issues/3597) |
 | **Maintainer** | [**M5Stack Platforms**](https://github.com/zephyrproject-rtos/zephyr/blob/main/MAINTAINERS.yml) in upstream Zephyr, `status: maintained` |
-| **Community** | Organizer of the *O-RAN in B5G/6G* track at COSCUP · I give technical talks in Taiwanese (Tâi-gí) |
 
 Every merged contribution, listed and linked: **[open-source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/)**
 
-<sub>The CNCF DevStats score refreshes automatically via GitHub Actions; other figures as of August 2026.</sub>
+<sub>The CNCF-related contribution count refreshes automatically via GitHub Actions from CNCF DevStats' <code>GithubIDContributions</code> API — a contribution count, not a weighted score. Other figures are authored, merged, public upstream pull requests, reconciled August 2026.</sub>
 
-### Recent work
+### How I work — three engineering campaigns
 
-I focus on correctness in Kubernetes Dynamic Resource Allocation (DRA), particularly quota arithmetic, allocator state management, and device lifecycle handling. A quota-accounting audit began with an `int64` overflow in Kueue ([`#12896`](https://github.com/kubernetes-sigs/kueue/issues/12896)). It led to a four-PR Kueue hardening series ([`#12897`](https://github.com/kubernetes-sigs/kueue/pull/12897), [`#12909`](https://github.com/kubernetes-sigs/kueue/pull/12909), [`#12945`](https://github.com/kubernetes-sigs/kueue/pull/12945), and [`#12954`](https://github.com/kubernetes-sigs/kueue/pull/12954)), followed by a corresponding overflow fix in Volcano ([`#5621`](https://github.com/volcano-sh/volcano/pull/5621)).
+Each starts from one defect and generalizes into a review invariant, then searches for that invariant's variants across projects.
 
-In Kubernetes core, I identified and fixed five defects in the structured DRA allocator. All five fixes were merged for Kubernetes v1.37 with release notes: prevented cross-driver collisions by scoping shared-counter caches to both driver and pool ([`#140435`](https://github.com/kubernetes/kubernetes/pull/140435)); made candidate rejection and backtracking reliably roll back reserved allocator state ([`#140431`](https://github.com/kubernetes/kubernetes/pull/140431)); stopped counters from being charged twice for persisted shared-device allocations ([`#140437`](https://github.com/kubernetes/kubernetes/pull/140437)); rejected unusable `validRange` bounds before they could cause divide-by-zero or incorrect validation ([`#140666`](https://github.com/kubernetes/kubernetes/pull/140666)); rejected unrepresentable capacity requests instead of accepting allocations that a device could not satisfy ([`#140442`](https://github.com/kubernetes/kubernetes/pull/140442)).
+**Resource accounting & Kubernetes DRA.** Schedulers and device-allocation paths audited against arithmetic and state invariants: sums, products, conversions, reservations, rollback, and persisted allocations must not overflow, truncate, leak, or be charged twice. Five structured-DRA allocator defects fixed and merged for Kubernetes v1.37 — driver/pool cache isolation, reliable backtracking rollback, no double-charge on persisted shared devices, unusable `validRange` rejection, and unrepresentable-capacity rejection — then the same variant search carried across Kueue, Volcano, CDI, and vendor DRA drivers (Intel QAT, Google TPU, IBM Power, AMD ROCm).
+[k8s #140435](https://github.com/kubernetes/kubernetes/pull/140435) · [#140431](https://github.com/kubernetes/kubernetes/pull/140431) · [#140437](https://github.com/kubernetes/kubernetes/pull/140437) · [#140666](https://github.com/kubernetes/kubernetes/pull/140666) · [#140442](https://github.com/kubernetes/kubernetes/pull/140442)
 
-I then ran the same variant analysis across vendor DRA drivers. A `ResourceClaim` can be satisfied by devices from more than one driver, so each driver's kubelet plugin must skip the allocation results it does not own; the reference driver (`kubernetes-sigs/dra-example-driver`) does exactly that, with a comment explaining why. Several vendors kept that guard on the config path they had copied from the reference but dropped it on their prepare path, so a pod whose claim mixes two drivers has a valid allocation rejected. I reported and fixed it in Google's TPU driver ([`#25`](https://github.com/kubernetes-sigs/dra-driver-google-tpu/pull/25)) and IBM's Power driver ([`#323`](https://github.com/IBM/power-dra-driver/pull/323)), and reported the same in IBM's Spyre driver ([`#59`](https://github.com/ibm-aiu/dra-driver-spyre/issues/59)); the SR-IOV driver ([`#136`](https://github.com/k8snetworkplumbingwg/dra-driver-sriov/issues/136)) drops the equivalent guard on its status-update path. The correct pattern already ships in the reference and still gets dropped when the loop is hand-rolled, so the fix belongs upstream: a shared helper or conformance check in `k8s.io/dynamic-resource-allocation` rather than more per-driver documentation.
+**Async lifecycle & observability.** OpenTelemetry C++ exporters reviewed by lifecycle contract: an operation must not outlive its owner, miss its completion notification, or be settled zero or two times under cancellation and shutdown races.
+[HttpServer use-after-free #4289](https://github.com/open-telemetry/opentelemetry-cpp/pull/4289) · [ES exporter lost wakeup #4298](https://github.com/open-telemetry/opentelemetry-cpp/pull/4298) · [curl exactly-once completion #4363](https://github.com/open-telemetry/opentelemetry-cpp/pull/4363)
 
-Related upstream fixes include a claim-unprepare device leak in Intel's QAT DRA driver ([`#74`](https://github.com/intel/intel-resource-drivers-for-kubernetes/pull/74)) and a slice-bounds panic in the CNCF Container Device Interface parser ([`#321`](https://github.com/cncf-tags/container-device-interface/pull/321)). Open work: a nil-dereference fix for KubeVirt's mediated-device builders ([`#18431`](https://github.com/kubevirt/kubevirt/pull/18431)) and an unlimited-quota sentinel bug in KAI-Scheduler's parent/child quota validation ([`#1881`](https://github.com/kai-scheduler/KAI-Scheduler/issues/1881)). Additional work is tracked through my [open pull requests](https://github.com/search?q=is%3Apr+author%3Athc1006+is%3Aopen&type=pullrequests).
+**Transactional cloud-native telecom.** NTN control paths in OCUDU treated as one transaction rather than isolated bugs — a SIB19 update audited end to end across coroutine lifetimes, queue backpressure, validation, rollback, timing boundaries, and system-information assembly. Carried through Nephio governance and upstream merge requests.
 
-### Community focus
+Full failure analyses, patches, tests, and review threads are in the [open-source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/); active work is tracked through my [open pull requests](https://github.com/search?q=is%3Apr+author%3Athc1006+is%3Aopen&type=pullrequests).
 
-My next focus is lowering the barrier from using cloud-native software to contributing upstream: newcomer sessions in Mandarin and Taiwanese (Tâi-gí), together with bilingual contribution walkthroughs based on real review discussions. I completed **LFC102: Inclusive Open Source Community Orientation** in July 2026.
+### Verified credential
+
+**AMD ROCm™ Certified Associate** — AMD. ROCm software application development, optimization, and deployment of AI/HPC workloads on AMD Instinct GPUs.
+[Verify on Credly](https://www.credly.com/badges/4c7dbe32-9ee7-4c15-8919-9f4dccd81383) · [related ROCm upstream work](https://github.com/ROCm/k8s-gpu-dra-driver/pulls?q=is%3Apr+author%3Athc1006)
+
+### Community
+
+I serve on the Nephio Technical Steering Committee, maintain M5Stack platforms in upstream Zephyr, and organize the *O-RAN in B5G/6G* track at COSCUP. I give technical talks in Taiwanese (Tâi-gí), and am building bilingual, review-driven contribution walkthroughs to lower the barrier from using cloud-native software to contributing upstream. Completed **LFC102: Inclusive Open Source Community Orientation** (July 2026).
 
 ---
 
