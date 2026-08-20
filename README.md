@@ -10,7 +10,7 @@ my way is simple. i find one bug, then i make it into a rule i can use again, an
 
 |  |  |
 | --- | --- |
-| **Merged upstream** | **240 pull requests in 68 projects.** 169 of them are in 44 CNCF and Kubernetes ecosystem repos. |
+| **Merged upstream** | **245 pull requests in 71 projects.** 171 of them are in 46 CNCF and Kubernetes ecosystem repos. |
 | **CNCF related contributions** | [**3,782**](https://devstats.cluster.fun/?user=thc1006) |
 | **Kubernetes** | [**GitHub org member**](https://github.com/kubernetes/org/issues/6498) |
 | **Governance** | [**Nephio TSC member**](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667), LF Networking |
