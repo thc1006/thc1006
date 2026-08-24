@@ -11,7 +11,7 @@ My way is simple. I find one bug, then I turn it into a rule I can reuse, and I 
 |  |  |
 | --- | --- |
 | **Merged upstream** | **248 pull requests in 71 projects.** 172 of them are in 46 CNCF and Kubernetes ecosystem repos. |
-| **CNCF related contributions** | [**3,807**](https://devstats.cluster.fun/?user=thc1006) |
+| **CNCF related contributions** | [**3,894**](https://devstats.cluster.fun/?user=thc1006) |
 | **Kubernetes** | [**GitHub org member**](https://github.com/kubernetes/org/issues/6498) |
 | **Governance** | [**Nephio TSC member**](https://lf-nephio.atlassian.net/wiki/spaces/HOME/pages/152305667), LF Networking |
 | **OpenTelemetry** | [**GitHub org member**](https://github.com/open-telemetry/community/issues/3597) |
