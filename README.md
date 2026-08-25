@@ -1,6 +1,10 @@
+<div align="center">
+
 # Hsiu-Chi Tsai · 蔡秀吉
 
-I look for correctness bugs in Kubernetes Dynamic Resource Allocation and in cloud native telecom. For DRA that means reading the scheduler and the allocator and checking the accounting: whether a device gets charged twice, whether a failed allocation actually puts the state back. I also send patches to the OpenTelemetry C++ exporters, usually lifetime and concurrency bugs.
+</div>
+
+I look for correctness bugs in Kubernetes Dynamic Resource Allocation (DRA) and in cloud native telecom. For DRA that means reading the scheduler and the allocator and checking the accounting: whether a device gets charged twice, whether a failed allocation actually puts the state back. I also send patches to the OpenTelemetry C++ exporters, usually lifetime and concurrency bugs.
 
 When I find one bug I go and look for the same bug somewhere else. Most of my patches come from that. I write a test with the fix, and reviewers still find things I missed.
 
