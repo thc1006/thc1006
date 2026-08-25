@@ -20,4 +20,4 @@ I am a research assistant at National Yang Ming Chiao Tung University in Taiwan.
 
 </div>
 
-<sub>CNCF DevStats counts [**3,929**](https://devstats.cluster.fun/?user=thc1006) contributions across CNCF projects. It is a raw count and it updates itself.</sub>
+<sub>CNCF DevStats counts [**3,895**](https://devstats.cluster.fun/?user=thc1006) contributions across CNCF projects. It is a raw count and it updates itself.</sub>
