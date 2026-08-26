@@ -12,4 +12,4 @@ I am a research assistant at National Yang Ming Chiao Tung University in Taiwan.
 
 [Website](https://people.cs.nycu.edu.tw/~hctsai1006/) · [Publications](https://people.cs.nycu.edu.tw/~hctsai1006/publications/) · [ORCID](https://orcid.org/0000-0001-7421-8027) · [LinkedIn](https://linkedin.com/in/thc1006) · hctsai@linux.com
 
-<sub>CNCF DevStats counts [**3,895**](https://devstats.cluster.fun/?user=thc1006) contributions across CNCF projects. It is a raw count and it updates itself.</sub>
+<sub>CNCF DevStats counts [**3,896**](https://devstats.cluster.fun/?user=thc1006) contributions across CNCF projects. It is a raw count and it updates itself.</sub>
