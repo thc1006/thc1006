@@ -4,7 +4,7 @@ I look for correctness bugs in Kubernetes Dynamic Resource Allocation (DRA) and 
 
 When I find one bug I go and look for the same bug somewhere else. Most of my patches come from that. I write a test with the fix, and reviewers still find things I missed.
 
-I currently serve as a CNCF Ambassador, a member of the Nephio Technical Steering Committee under Linux Foundation Networking, and an M5Stack Platforms Maintainer in the Zephyr Project. I also hold the [AMD ROCm Certified Associate](https://www.credly.com/badges/4c7dbe32-9ee7-4c15-8919-9f4dccd81383) certification.
+I currently serve as a **CNCF Ambassador*** and **Nephio Technical Steering Committee Member** which under Linux Foundation Networking (LFN), and an **M5Stack Platforms Maintainer** in the **Zephyr Project**. I also recently get the [AMD ROCm Certified Associate](https://www.credly.com/badges/4c7dbe32-9ee7-4c15-8919-9f4dccd81383) certification.
 
 My merged pull requests are listed in my [open source portfolio](https://people.cs.nycu.edu.tw/~hctsai1006/open-source/), along with the open ones and the issues someone else ended up fixing.
 
