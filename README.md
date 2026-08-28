@@ -4,8 +4,6 @@
 
 I look for correctness bugs in **Kubernetes Dynamic Resource Allocation (DRA)** and **Cloud-Native Telecom systems**. For DRA, that means reading the scheduler and allocator and checking the accounting invariants: whether a device is counted twice, or whether every state mutation made during a failed allocation is rolled back. I also send patches to **OpenTelemetry C++**, mostly for object-lifetime, cancellation, and concurrency bugs in its exporters and HTTP transport.
 
-When I find one bug, I look for the same bug pattern elsewhere. Many of my patches start that way. I include a regression test with the fix, and reviewers still catch things I missed.
-
 I currently serve as a **CNCF Ambassador** and as a member of the **Nephio Technical Steering Committee (TSC)**. Nephio is part of **Linux Foundation Networking (LFN)**. I also maintain **M5Stack platforms** in the **Zephyr Project** and hold the [**AMD ROCm Certified Associate**](https://www.credly.com/badges/4c7dbe32-9ee7-4c15-8919-9f4dccd81383) credential.
 
 I am an undergraduate at [National Yang Ming Chiao Tung University (NYCU)](https://www.nycu.edu.tw/nycu/en/) in Taiwan, Studying AI and Medicine and also a little bit Slavic languages. I received clinical training through an Internal medicine clerkship at **Taipei City Hospital, Yangming Branch**, and Surgical clerkship at **University Hospital Hradec Králové**.
