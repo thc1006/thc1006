@@ -6,7 +6,7 @@ I look for correctness bugs in **Kubernetes Dynamic Resource Allocation (DRA)** 
 
 I currently serve as a **CNCF Ambassador** and as a member of the **Nephio Technical Steering Committee (TSC)**. Nephio is part of **Linux Foundation Networking (LFN)**. I am a **Release Signal Shadow** on the **Kubernetes v1.38 Release Team**. I also maintain **M5Stack platforms** in the **Zephyr Project** and hold the [**AMD ROCm Certified Associate**](https://www.credly.com/badges/4c7dbe32-9ee7-4c15-8919-9f4dccd81383) credential.
 
-I am an undergraduate at [National Yang Ming Chiao Tung University (NYCU)](https://www.nycu.edu.tw/nycu/en/) in Taiwan, Studying AI and Medicine and also a little bit Slavic languages. I received clinical training through an Internal medicine clerkship at **Taipei City Hospital, Yangming Branch**, and Surgical clerkship at **University Hospital Hradec Králové**.
+I am an undergraduate at **[National Yang Ming Chiao Tung University (NYCU)](https://www.nycu.edu.tw/nycu/en/)** in Taiwan, Studying AI and Medicine and also learning a little bit Slavic languages at [NCCU](https://www.nccu.edu.tw/index.php?Lang=en). I received clinical training through an Internal medicine clerkship at **Taipei City Hospital, Yangming Branch**, and Surgical clerkship at **University Hospital Hradec Králové**.
 
 I grew up in a fishing village in southern Taiwan. I organize the **O-RAN in B5G/6G** track at **[COSCUP](https://coscup.org/)** and give technical talks in Taiwanese. I help and alos want more people contribute to open source so that, together, we can make Taiwan and the World be better and better!!!
 
