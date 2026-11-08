@@ -10,4 +10,4 @@ I am an undergraduate at **[National Yang Ming Chiao Tung University (NYCU)](htt
 
 I grew up in a fishing village in southern Taiwan. I organize the **O-RAN in B5G/6G** track at **[COSCUP](https://coscup.org/)** and give technical talks in Taiwanese. I help and alos want more people contribute to open source so that, together, we can make Taiwan and the World be better and better!!!
 
-<sub>CNCF DevStats counts [**12,522**](https://devstats.cluster.fun/?user=thc1006) contributions across CNCF projects. It's update automation and [My site](https://cs.nycu.edu.tw/~hctsai1006/open-source/) lists my open source contributions in detail.</sub>
+<sub>CNCF DevStats counts [**12,685**](https://devstats.cluster.fun/?user=thc1006) contributions across CNCF projects. It's update automation and [My site](https://cs.nycu.edu.tw/~hctsai1006/open-source/) lists my open source contributions in detail.</sub>
